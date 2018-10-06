@@ -23,59 +23,61 @@ import java.util.function.Function;
 
 public class TaxCalculator {
 
-    public static double calculate( Order order, boolean useRegional, boolean useGeneral, boolean useSurcharge ) {
-        double value = order.getValue();
-        if (useRegional) value = Tax.regional(value);
-        if (useGeneral) value = Tax.general(value);
-        if (useSurcharge) value = Tax.surcharge(value);
-        return value;
+  public static double calculate(Order order, boolean useRegional, boolean useGeneral, boolean useSurcharge) {
+    double value = order.getValue();
+    if (useRegional) {
+      value = Tax.regional(value);
     }
-
-    private boolean useRegional;
-    private boolean useGeneral;
-    private boolean useSurcharge;
-
-    public TaxCalculator withTaxRegional() {
-        useRegional = true;
-        return this;
+    if (useGeneral) {
+      value = Tax.general(value);
     }
-
-    public TaxCalculator withTaxGeneral() {
-        useGeneral= true;
-        return this;
+    if (useSurcharge) {
+      value = Tax.surcharge(value);
     }
+    return value;
+  }
 
-    public TaxCalculator withTaxSurcharge() {
-        useSurcharge = true;
-        return this;
-    }
+  private boolean useRegional;
+  private boolean useGeneral;
+  private boolean useSurcharge;
 
-    public double calculate(Order order) {
-        return calculate( order, useRegional, useGeneral, useSurcharge );
-    }
+  public TaxCalculator withTaxRegional() {
+    useRegional = true;
+    return this;
+  }
 
-    public Function<Double, Double> taxFuncion = Function.identity();
+  public TaxCalculator withTaxGeneral() {
+    useGeneral = true;
+    return this;
+  }
 
-    public TaxCalculator with(Function<Double, Double> f) {
-        taxFuncion.andThen( f );
-        return this;
-    }
+  public TaxCalculator withTaxSurcharge() {
+    useSurcharge = true;
+    return this;
+  }
 
-    public double calculateF(Order order) {
-        return taxFuncion.apply( order.getValue() );
-    }
+  public double calculate(Order order) {
+    return calculate(order, useRegional, useGeneral, useSurcharge);
+  }
 
-    public static void main(String[] args) {
-        Order order = new Order();
+  public Function<Double, Double> taxFuncion = Function.identity();
 
-        double value = TaxCalculator.calculate( order, true, false, true );
+  public TaxCalculator with(Function<Double, Double> f) {
+    taxFuncion.andThen(f);
+    return this;
+  }
 
-        value = new TaxCalculator().withTaxRegional()
-                                   .withTaxSurcharge()
-                                   .calculate( order );
+  public double calculateF(Order order) {
+    return taxFuncion.apply(order.getValue());
+  }
 
-        value = new TaxCalculator().with(Tax::regional)
-                                   .with(Tax::surcharge)
-                                   .calculate( order );
-    }
+  public static void main(String[] args) {
+    Order order = new Order();
+
+    double value = TaxCalculator.calculate(order, true, false, true);
+
+    value = new TaxCalculator().withTaxRegional().withTaxSurcharge().calculate(order);
+
+    value = new TaxCalculator().with(Tax::regional).with(Tax::surcharge).calculate(order);
+  }
 }
